@@ -33,8 +33,7 @@ libraio_la_SOURCES = $(libraio_include_HEADERS) 	\
 		     $(libraio_headers)		      	\
 		     msg_pool.c			      	\
 		     raio_utils.c			\
-		     raio_api.c		
-
+		     raio_api.c
 
 # list of sources for the binary
 raio_server_SOURCES = raio_server.c		\
@@ -55,8 +54,10 @@ libraio_la_LDFLAGS = -lxio -lrdmacm -libverbs -laio -lrt \
 
 # the additional libraries needed to link raio_server
 #raio_server_LDADD = libraio.a $(AM_LDFLAGS)
-raio_client_LDADD = -lraio -L$(top_builddir)/examples/usr/raio/ $(AM_LDFLAGS)
-raio_server_LDADD = -lraio -L$(top_builddir)/examples/usr/raio/ $(AM_LDFLAGS)
+raio_client_LDADD = -L$(top_builddir)/examples/usr/raio/ \
+	-lraio -lxio -laio -lpthread $(AM_LDFLAGS)
+raio_server_LDADD = -L$(top_builddir)/examples/usr/raio/ \
+	-lraio -lxio -laio -lpthread $(AM_LDFLAGS)
 
 EXTRA_DIST =
 
