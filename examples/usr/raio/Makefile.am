@@ -1,7 +1,8 @@
 # this is example file: examples/hello_world/Makefile.am
 
 # additional include pathes necessary to compile the C programs
-AM_CFLAGS = -DPIC -fPIC -I$(top_srcdir)/include @AM_CFLAGS@
+AM_CFLAGS = -DPIC -fPIC -Wno-error=unused-but-set-variable \
+	-I$(top_srcdir)/include @AM_CFLAGS@
 #AM_LDFLAGS = -lxio -libverbs -lrdmacm -lrt -laio \
 #	     -L$(top_builddir)/src/usr/ 
 
@@ -34,7 +35,7 @@ libraio_la_SOURCES = $(libraio_include_HEADERS) 	\
 		     raio_utils.c			\
 		     raio_api.c		
 
-	
+
 # list of sources for the binary
 raio_server_SOURCES = raio_server.c		\
 		      raio_handlers.c		\

@@ -1,7 +1,7 @@
 # this is example-file: src/Makefile.am
 
 # additional include paths necessary to compile the C library
-AM_CFLAGS = -fPIC -DPIC  				\
+AM_CFLAGS = -fPIC -DPIC -Wno-error=unused-but-set-variable -D_REENTRANT			\
 	    -I$(top_srcdir)/src/usr -I$(top_srcdir)/src/common -I$(top_srcdir)/include \
 	    @AM_CFLAGS@
 
@@ -76,16 +76,16 @@ libxio_la_SOURCES =	$(libxio_headers)		\
 			../common/xio_conns_store.c	\
 			../common/xio_transport.c	\
 			../common/xio_connection.c
-	
-				
+
+
 #libxio_la_LDFLAGS = -shared -rdynamic	 		\
 #		      -lrdmacm -libverbs -lrt -ldl
 
-libxio_la_LDFLAGS = -lrdmacm -libverbs -lrt 
+libxio_la_LDFLAGS = -lrdmacm -libverbs -lrt -lpthread
 
 #libxio_la_LIBADD = $(AM_LDFLAGS)
 
 #EXTRA_DIST = 		libxio.map      		\
 #	     		libxio.spec.in
-				
+
 ###############################################################################
