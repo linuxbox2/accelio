@@ -49,6 +49,7 @@ void *malloc_huge_pages(size_t size)
 	/* Use 1 extra page to store allocation metadata */
 	/* (libhugetlbfs is more efficient in this regard) */
 	size_t real_size = ALIGN(size + HUGE_PAGE_SZ, HUGE_PAGE_SZ);
+	int retval;
 
 	void *ptr = mmap64(NULL, real_size, PROT_READ | PROT_WRITE,
 			MAP_PRIVATE | MAP_ANONYMOUS |
@@ -59,8 +60,8 @@ void *malloc_huge_pages(size_t size)
 		WARN_LOG("mmap64 rdma pool sz:%zu failed (errno=%d %m)\n",
 			 real_size, errno);
 		real_size = ALIGN(size + HUGE_PAGE_SZ, page_size);
-		posix_memalign(&ptr, page_size, real_size);
-		if (ptr == NULL) {
+		retval = posix_memalign(&ptr, page_size, real_size);
+		if (retval != 0) {
 			ERROR_LOG("posix_memalign failed sz:%zu. %m\n",
 				  real_size);
 			return NULL;
