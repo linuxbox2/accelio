@@ -1,9 +1,9 @@
 # this is example-file: src/Makefile.am
 
 # additional include paths necessary to compile the C library
-AM_CFLAGS = -fPIC -DPIC -Wno-error=unused-but-set-variable -D_REENTRANT			\
-	    -I$(top_srcdir)/src/usr -I$(top_srcdir)/src/common -I$(top_srcdir)/include \
-	    @AM_CFLAGS@
+AM_CFLAGS = -fPIC -DPIC -Wno-error=padded -Wno-error=unused-but-set-variable \
+	-D_REENTRANT -I$(top_srcdir)/src/usr -I$(top_srcdir)/src/common \
+	-I$(top_srcdir)/include @AM_CFLAGS@
 
 ###############################################################################
 # THE LIBRARIES TO BUILD
