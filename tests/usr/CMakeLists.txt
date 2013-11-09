@@ -1,0 +1,5 @@
+
+add_subdirectory(hello_test)
+add_subdirectory(hello_test_bidi)
+add_subdirectory(hello_test_lat)
+add_subdirectory(hello_test_oneway)
