@@ -442,7 +442,7 @@ inline size_t xio_iovex_length(const struct xio_iovec_ex *iov,
 /*---------------------------------------------------------------------------*/
 /* msg_reset								     */
 /*---------------------------------------------------------------------------*/
-void msg_reset(struct xio_msg *msg)
+void xio_msg_reset(struct xio_msg *msg)
 {
 	msg->in.header.iov_base = NULL;
 	msg->in.header.iov_len = 0;
