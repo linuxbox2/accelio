@@ -139,6 +139,9 @@ int main(int argc, char *argv[])
 	void			*loop;
 	int			i;
 
+	/* initialize XIO */
+	xio_init();
+
 
 	/* open default event loop */
 	loop	= xio_ev_loop_init();

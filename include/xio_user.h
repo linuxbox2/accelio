@@ -513,6 +513,15 @@ struct xio_session_ops {
 			void *conn_user_context);
 };
 
+/**
+ * Initialize package
+ *
+ * Idempotent routine to initialize the package.
+ *
+ */
+ void xio_init(void);
+ 
+
 /*---------------------------------------------------------------------------*/
 /* Memory registration API                                                   */
 /*---------------------------------------------------------------------------*/

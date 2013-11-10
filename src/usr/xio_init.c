@@ -45,10 +45,20 @@
 /*---------------------------------------------------------------------------*/
 /* xio_constructor like module init					     */
 /*---------------------------------------------------------------------------*/
-__attribute__((constructor)) void xio_constructor(void)
+__attribute__((constructor)) void xio_init(void)
 {
-	sessions_store_construct();
-	conns_store_construct();
+	static atomic_t initialized;
+	static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+	
+	if (! atomic_read(&initialized)) {
+		pthread_mutex_lock(&mtx);
+		if (! atomic_read(&initialized)) {
+			sessions_store_construct();
+			conns_store_construct();
+			atomic_set(&initialized, 1);
+		}
+		pthread_mutex_unlock(&mtx);
+	}
 }
 
 /*

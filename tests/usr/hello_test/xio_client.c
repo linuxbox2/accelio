@@ -51,7 +51,7 @@
 
 #define MAX_HEADER_SIZE		32
 #define MAX_DATA_SIZE		32
-#define PRINT_COUNTER		4000000
+#define PRINT_COUNTER		1000 /* 4000000 */
 #define XIO_DEF_ADDRESS		"127.0.0.1"
 #define XIO_DEF_PORT		2061
 #define XIO_DEF_HEADER_SIZE	32
@@ -493,6 +493,8 @@ int main(int argc, char *argv[])
 	print_test_config(&test_config);
 
 	set_cpu_affinity(test_config.cpu);
+
+	xio_init();
 
 	loop = xio_ev_loop_init();
 	if (loop == NULL) {
