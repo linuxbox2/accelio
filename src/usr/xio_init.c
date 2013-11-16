@@ -71,7 +71,7 @@ __attribute__((destructor)) void xio_shutdown(void)
 
 	pthread_mutex_lock(&mtx);
 
-	/* XXX add shutdown hooks */
+	/* XXX add shutdown hooks (it must be safe to re-initialize) */
 
 	/* reset */
 	atomic_set(&initialized, 0);
