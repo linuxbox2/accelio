@@ -520,6 +520,14 @@ struct xio_session_ops {
  *
  */
  void xio_init(void);
+
+/**
+ * Shutdown package
+ *
+ * Shutdown/reset the package.
+ *
+ */
+ void xio_shutdown(void);
  
 
 /*---------------------------------------------------------------------------*/

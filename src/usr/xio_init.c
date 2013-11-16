@@ -42,14 +42,14 @@
 #include "xio_sessions_store.h"
 #include "xio_conns_store.h"
 
+static atomic_t initialized;
+static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+
 /*---------------------------------------------------------------------------*/
-/* xio_constructor like module init					     */
+/* xio_init like module init					     */
 /*---------------------------------------------------------------------------*/
 __attribute__((constructor)) void xio_init(void)
 {
-	static atomic_t initialized;
-	static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
-	
 	if (! atomic_read(&initialized)) {
 		pthread_mutex_lock(&mtx);
 		if (! atomic_read(&initialized)) {
@@ -61,8 +61,19 @@ __attribute__((constructor)) void xio_init(void)
 	}
 }
 
-/*
-__attribute__((destructor)) void xio_constructor(void)
+/*---------------------------------------------------------------------------*/
+/* xio_shutdown conversely, shutdown and reset				     */
+/*---------------------------------------------------------------------------*/
+__attribute__((destructor)) void xio_shutdown(void)
 {
+	if (! atomic_read(&initialized))
+		return;
+
+	pthread_mutex_lock(&mtx);
+
+	/* XXX add shutdown hooks */
+
+	/* reset */
+	atomic_set(&initialized, 0);
+	pthread_mutex_unlock(&mtx);
 }
-*/
