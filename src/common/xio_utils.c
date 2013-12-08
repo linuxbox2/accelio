@@ -343,3 +343,8 @@ size_t memcpyv(struct xio_iovec *dst, int dsize,
 	return d;
 }
 
+uint64_t xio_get_timestamp(void)
+{
+	return get_cycles();
+}
+
