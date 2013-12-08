@@ -1239,6 +1239,14 @@ int xio_set_opt(void *xio_obj, int level, int optname,
 int xio_get_opt(void *xio_obj, int level, int optname,
 		void *optval, int *optlen);
 
+/**
+ * Return the instantaneous value of get_cycles() as a
+ * 64-bit integer.  This is useful because it is reliably
+ * ordered with respect to various xio timestamps.
+ *
+ * @returns	the current time in cycles
+ */
+uint64_t xio_get_timestamp(void);
 
 #ifdef __cplusplus
 }

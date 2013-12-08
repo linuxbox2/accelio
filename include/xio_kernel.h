@@ -898,5 +898,14 @@ void xio_context_stop_loop(struct xio_context *ctx);
 
 int xio_context_add_event(struct xio_context *ctx, struct xio_ev_data *data);
 
+/**
+ * Return the instantaneous value of get_cycles() as a
+ * 64-bit integer.  This is useful because it is reliably
+ * ordered with respect to various xio timestamps.
+ *
+ * @returns	the current time in cycles
+ */
+uint64_t xio_get_timestamp(void);
+
 #endif /*XIO_API_H */
 
