@@ -1117,6 +1117,14 @@ int xio_ev_loop_add(void *loop,
  */
 int xio_ev_loop_del(void *loop, int fd);
 
+/**
+ * Return the instantaneous value of get_cycles() as a
+ * 64-bit integer.  This is useful because it is reliably
+ * ordered with respect to various xio timestamps.
+ *
+ * @returns	the current time in cycles
+ */
+uint64_t xio_get_timestamp(void);
 
 #ifdef __cplusplus
 }
