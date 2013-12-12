@@ -280,6 +280,9 @@ int main(int argc, char *argv[])
 
 	memset(&server_data, 0, sizeof(server_data));
 
+	/* init library */
+	xio_init();
+
 	/* open default event loop */
 	loop	= xio_ev_loop_init();
 
