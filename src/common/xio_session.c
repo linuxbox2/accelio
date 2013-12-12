@@ -1185,7 +1185,6 @@ static int xio_on_setup_rsp_recv(struct xio_connection *connection,
 	uint16_t			action = 0;
 	struct xio_session		*session = connection->session;
 	struct xio_new_session_rsp	*rsp = &session->new_ses_rsp;
-	struct xio_connection		*tmp_connection;
 	int				retval = 0;
 
 	retval = xio_read_setup_rsp(connection, task, &action);
@@ -1208,9 +1207,8 @@ static int xio_on_setup_rsp_recv(struct xio_connection *connection,
 			xio_prep_portal(connection);
 
 			/* insert the lead_conn connection into list */
-			tmp_connection =
-				xio_session_assign_conn(session,
-							connection->conn);
+			(void) xio_session_assign_conn(session,
+						       connection->conn);
 			if (connection == session->lead_conn)
 				session->lead_conn = NULL;
 			else
