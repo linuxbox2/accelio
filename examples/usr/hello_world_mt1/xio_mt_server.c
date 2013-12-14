@@ -277,6 +277,7 @@ int main(int argc, char *argv[])
 	int			i;
 	uint16_t		port = atoi(argv[2]);
 
+	xio_init();
 
 	memset(&server_data, 0, sizeof(server_data));
 
