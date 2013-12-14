@@ -189,6 +189,8 @@ int main(int argc, char *argv[])
 		.tv_nsec = 0
 	};
 
+	xio_init();
+
 	memset(&session_data, 0, sizeof(session_data));
 
 
