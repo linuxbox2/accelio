@@ -68,8 +68,8 @@ static void *portal_worker_thread(void *data)
 {
 	struct portal_data	*portal = data;
 	cpu_set_t		cpuset;
-	/* set affinity to thread */
 
+	/* set affinity to thread */
 	CPU_ZERO(&cpuset);
 	CPU_SET(portal->affinity, &cpuset);
 
@@ -174,7 +174,7 @@ struct xio_session_ops ses_ops = {
 int main(int argc, char *argv[])
 {
 	char			url[256];
-	struct session_data	session_data;
+	struct session_data	sdata;
 	char			str[128];
 
 
@@ -191,63 +191,56 @@ int main(int argc, char *argv[])
 
 	xio_init();
 
-	memset(&session_data, 0, sizeof(session_data));
-
+	memset(&sdata, 0, sizeof(sdata));
 
 	/* open default event loop */
-	session_data.portal.loop = xio_ev_loop_init();
+	sdata.portal.loop = xio_ev_loop_init();
 
 	/* create thread context for the client */
-	session_data.portal.ctx = xio_ctx_open(NULL, session_data.portal.loop, 0);
+	sdata.portal.ctx = xio_ctx_open(NULL, sdata.portal.loop, 0);
 
+	/* spawn thread to handle connection */
+	sdata.portal.affinity = 1;
+	sdata.portal.cnt = 0;
 
+	/* thread is working on the same session */
+	sdata.portal.session = sdata.session;
+	pthread_create(&sdata.portal.thread_id, NULL,
+		       portal_worker_thread, &sdata.portal);
 
 	/* create url to connect to */
 	sprintf(url, "rdma://%s:%s", argv[1], argv[2]);
-	session_data.session = xio_session_open(XIO_SESSION_REQ,
-						&attr, url,
-						0, 0, &session_data);
+	sdata.session = xio_session_open(XIO_SESSION_REQ,
+					 &attr, url, 0, 0, &sdata);
 
-	if (session_data.session == NULL)
+	if (sdata.session == NULL)
 		goto cleanup;
 
-
 	/* connect the session  */
-	session_data.portal.conn = xio_connect(
-			session_data.session,
-			session_data.portal.ctx,
-			0, NULL, &session_data.portal);
-
-	/* spawn thread to handle connection */
-	session_data.portal.affinity = 1;
-	session_data.portal.cnt	     = 0;
-
-	/* thread is working on the same session */
-	session_data.portal.session = session_data.session;
-	pthread_create(&session_data.portal.thread_id, NULL,
-			portal_worker_thread, &session_data.portal);
+	sdata.portal.conn = xio_connect(
+		sdata.session,
+		sdata.portal.ctx,
+		0, NULL, &sdata.portal);
 
 	/* create "hello world" message */
-	memset(&session_data.portal.req, 0, sizeof(session_data.portal.req));
+	memset(&sdata.portal.req, 0, sizeof(sdata.portal.req));
 	sprintf(str,"hello world header request from thread %d",
-		session_data.portal.affinity);
-	session_data.portal.req.out.header.iov_base = strdup(str);
-	session_data.portal.req.out.header.iov_len =
-		strlen(session_data.portal.req.out.header.iov_base);
-
+		sdata.portal.affinity);
+	sdata.portal.req.out.header.iov_base = strdup(str);
+	sdata.portal.req.out.header.iov_len =
+		strlen(sdata.portal.req.out.header.iov_base);
 
 	/* send first message */
 	while (1) {
-		xio_send_request(session_data.portal.conn, &session_data.portal.req);
+		xio_send_request(sdata.portal.conn, &sdata.portal.req);
 		nanosleep(&ts, NULL);
 	}
 
 	/* join the thread */
-	pthread_join(session_data.portal.thread_id, NULL);
-
+	pthread_join(sdata.portal.thread_id, NULL);
 
 	/* close the session */
-	xio_session_close(session_data.session);
+	xio_session_close(sdata.session);
 
 cleanup:
 

@@ -264,64 +264,117 @@ struct xio_session_ops  server_ops = {
 	.on_msg_error			=  NULL
 };
 
+#if UNBOUND_OUTBOUND_THREAD
+static struct outbound_data
+{
+	/* XXX no xio_server, because we never xio_bind */
+	pthread_t thread_id;
+	struct xio_context *ctx;
+	void *loop;
+} outbound;
+#endif
+
+static struct inbound_data
+{
+	pthread_t thread_id;
+	struct xio_server *server; /* server portal */
+	struct hw_server_data server_data;
+	char url[256];
+	struct xio_context *ctx;
+	int ready;
+	pthread_mutex_t mtx;
+	pthread_cond_t cv;
+	void *loop;
+} inbound;
+
+#if UNBOUND_OUTBOUND_THREAD
+/* extra ctxt for outbound calls */
+static void *outbound_thread(void *data)
+{
+	xio_ev_loop_run(outbound.loop);
+	xio_ctx_close(outbound.ctx);
+	xio_ev_loop_destroy(&outbound.loop);
+	return NULL;
+}
+#endif
+
+/* inbound acceptor/redirector */
+static void *acceptor_thread(void *data)
+{
+	pthread_mutex_lock(&inbound.mtx);
+
+	/* bind a listener server to a portal/url */
+	printf("default bind/listen: %s\n", inbound.url);
+	inbound.server = xio_bind(inbound.ctx, &server_ops, inbound.url,
+				  NULL, 0, &inbound.server_data);
+	if (inbound.server == NULL)
+		abort();
+
+	inbound.ready = 1;
+	pthread_cond_signal(&inbound.cv);
+	pthread_mutex_unlock(&inbound.mtx);
+
+	xio_ev_loop_run(inbound.loop);
+	xio_unbind(inbound.server);
+	xio_ctx_close(inbound.ctx);
+	xio_ev_loop_destroy(&inbound.loop);
+	return NULL;
+}
+
 /*---------------------------------------------------------------------------*/
 /* main									     */
 /*---------------------------------------------------------------------------*/
 int main(int argc, char *argv[])
 {
-	struct xio_server	*server;	/* server portal */
-	struct hw_server_data	server_data;
-	char			url[256];
-	struct xio_context	*ctx;
-	void			*loop;
 	int			i;
 	uint16_t		port = atoi(argv[2]);
 
 	xio_init();
 
-	memset(&server_data, 0, sizeof(server_data));
+	/* set up for acceptor bind */
+	sprintf(inbound.url, "rdma://%s:%d", argv[1], port);
+	pthread_mutex_init(&inbound.mtx, NULL);
+	pthread_cond_init(&inbound.cv, NULL);
 
-	/* open default event loop */
-	loop	= xio_ev_loop_init();
+#if UNBOUND_OUTBOUND_THREAD
+	/* start outbound thread */
+	outbound.loop = xio_ev_loop_init();
+	outbound.ctx = xio_ctx_open(NULL, outbound.loop, 0);
+	pthread_create(&outbound.thread_id, NULL, outbound_thread, NULL);
+#endif
 
-	/* create thread context for the client */
-	ctx	= xio_ctx_open(NULL, loop, 0);
+	/* start acceptor thread */
+	inbound.loop = xio_ev_loop_init();
+	inbound.ctx = xio_ctx_open(NULL, inbound.loop, 0);
+	pthread_create(&inbound.thread_id, NULL, acceptor_thread, NULL);
 
-	/* create url to connect to */
-	sprintf(url, "rdma://%s:%d", argv[1], port);
-	/* bind a listener server to a portal/url */
-	server = xio_bind(ctx, &server_ops, url, NULL, 0, &server_data);
-	if (server == NULL)
-		goto cleanup;
-
+	/* wait for default ctx init */
+	do {
+		pthread_mutex_lock(&inbound.mtx);
+		pthread_cond_wait(&inbound.cv, &inbound.mtx);
+	} while (! inbound.ready);
 
 	/* spawn portals */
 	for (i = 0; i < MAX_THREADS; i++) {
-		server_data.tdata[i].affinity = i+1;
+		inbound.server_data.tdata[i].affinity = i+1;
 		port += 1;
-		sprintf(server_data.tdata[i].portal, "rdma://%s:%d",
+		sprintf(inbound.server_data.tdata[i].portal, "rdma://%s:%d",
 			argv[1], port);
-		pthread_create(&server_data.tdata[i].thread_id, NULL,
-			       portal_server_cb, &server_data.tdata[i]);
+		pthread_create(&inbound.server_data.tdata[i].thread_id, NULL,
+			       portal_server_cb, &inbound.server_data.tdata[i]);
 	}
 
-	xio_ev_loop_run(loop);
+#if UNBOUND_OUTBOUND_THREAD
+	pthread_join(outbound.thread_id, NULL);
+#endif
+	pthread_join(inbound.thread_id, NULL);
 
 	/* normal exit phase */
 	fprintf(stdout, "exit signaled\n");
 
 	/* join the threads */
 	for (i = 0; i < MAX_THREADS; i++)
-		pthread_join(server_data.tdata[i].thread_id, NULL);
-
-	/* free the server */
-	xio_unbind(server);
-cleanup:
-	/* free the context */
-	xio_ctx_close(ctx);
-
-	/* destroy the default loop */
-	xio_ev_loop_destroy(&loop);
+		pthread_join(inbound.server_data.tdata[i].thread_id, NULL);
 
 	return 0;
 }
