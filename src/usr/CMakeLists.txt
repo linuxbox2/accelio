@@ -24,6 +24,7 @@ set (libxio_srcs
   xio_rdma_mempool.c
   xio_rdma_utils.c
   xio_rdma_verbs.c
+  xio_schedwork.c
   xio_task.c
   xio_tls.c
   xio_usr_utils.c
