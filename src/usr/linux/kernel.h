@@ -2,6 +2,7 @@
 #define _LINUX_KERNEL_H
 
 #include <linux/slab.h>
+#include <pthread.h>
 
 /*---------------------------------------------------------------------------*/
 /* defines								     */
