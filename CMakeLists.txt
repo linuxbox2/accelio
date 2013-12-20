@@ -7,13 +7,23 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
 
 include_directories(  
   ${PROJECT_BINARY_DIR}/include
+  ${OFED_PREFIX}/include
+)
+
+link_directories(
+  ${OFED_PREFIX}/lib
 )
 
 #Check Includes
-include(CheckIncludeFiles)
+include(CheckIncludeFile)
 
-CHECK_INCLUDE_FILES("infiniband/verbs.h" HAVE_VERBS_H)
-CHECK_INCLUDE_FILES("rdma/rdma_cma.h" HAVE_RDMA_CMA_H)
+SET(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES}
+  "${OFED_PREFIX}/include")
+
+CHECK_INCLUDE_FILE("infiniband/verbs.h" HAVE_VERBS_H)
+CHECK_INCLUDE_FILE("rdma/rdma_cma.h" HAVE_RDMA_CMA_H)
+
+find_library(IBVERBS, ibverbs, "${OFED_PREFIX}/lib")
 
 # require verbs headers
 if((NOT HAVE_VERBS_H) OR (NOT HAVE_RDMA_CMA_H))
