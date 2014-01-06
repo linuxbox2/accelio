@@ -82,7 +82,7 @@ static void *portal_worker_thread(void *data)
 	fprintf(stdout, "exit signaled\n");
 
 	/* free the context */
-	xio_ctx_close(portal->ctx);
+	xio_ctx_destroy(portal->ctx);
 
 	/* destroy the default loop */
 	xio_ev_loop_destroy(&portal->loop);
@@ -129,7 +129,7 @@ static int on_session_event(struct xio_session *session,
 		xio_disconnect(event_data->conn);
 		break;
 	case XIO_SESSION_TEARDOWN_EVENT:
-		xio_ev_loop_stop(session_data->portal.loop);
+		xio_ev_loop_stop(session_data->portal.loop, 0);
 		break;
 	default:
 		break;
@@ -194,10 +194,10 @@ int main(int argc, char *argv[])
 	memset(&sdata, 0, sizeof(sdata));
 
 	/* open default event loop */
-	sdata.portal.loop = xio_ev_loop_init();
+	sdata.portal.loop = xio_ev_loop_create();
 
 	/* create thread context for the client */
-	sdata.portal.ctx = xio_ctx_open(NULL, sdata.portal.loop, 0);
+	sdata.portal.ctx = xio_ctx_create(NULL, sdata.portal.loop, 0);
 
 	/* spawn thread to handle connection */
 	sdata.portal.affinity = 1;
@@ -210,8 +210,8 @@ int main(int argc, char *argv[])
 
 	/* create url to connect to */
 	sprintf(url, "rdma://%s:%s", argv[1], argv[2]);
-	sdata.session = xio_session_open(XIO_SESSION_REQ,
-					 &attr, url, 0, 0, &sdata);
+	sdata.session = xio_session_create(XIO_SESSION_REQ,
+					   &attr, url, 0, 0, &sdata);
 
 	if (sdata.session == NULL)
 		goto cleanup;
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
 	pthread_join(sdata.portal.thread_id, NULL);
 
 	/* close the session */
-	xio_session_close(sdata.session);
+	xio_session_destroy(sdata.session);
 
 cleanup:
 

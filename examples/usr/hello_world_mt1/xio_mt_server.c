@@ -163,10 +163,10 @@ static void *portal_server_cb(void *data)
 	pthread_setaffinity_np(tdata->thread_id, sizeof(cpu_set_t), &cpuset);
 
 	/* open default event loop */
-	tdata->loop = xio_ev_loop_init();
+	tdata->loop = xio_ev_loop_create();
 
 	/* create thread context for the client */
-	ctx = xio_ctx_open(NULL, tdata->loop, 0);
+	ctx = xio_ctx_create(NULL, tdata->loop, 0);
 
 	/* bind a listener server to a portal/url */
 	printf("thread [%d] - listen:%s\n", tdata->affinity, tdata->portal);
@@ -198,7 +198,7 @@ static void *portal_server_cb(void *data)
 
 cleanup:
 	/* free the context */
-	xio_ctx_close(ctx);
+	xio_ctx_destroy(ctx);
 
 	/* destroy the default loop */
 	xio_ev_loop_destroy(&tdata->loop);
@@ -224,7 +224,7 @@ static int on_session_event(struct xio_session *session,
 	case XIO_SESSION_CONNECTION_CLOSED_EVENT:
 		break;
 	case XIO_SESSION_TEARDOWN_EVENT:
-		xio_session_close(session);
+		xio_session_destroy(session);
 		break;
 	default:
 		break;
@@ -292,7 +292,7 @@ static struct inbound_data
 static void *outbound_thread(void *data)
 {
 	xio_ev_loop_run(outbound.loop);
-	xio_ctx_close(outbound.ctx);
+	xio_ctx_destroy(outbound.ctx);
 	xio_ev_loop_destroy(&outbound.loop);
 	return NULL;
 }
@@ -316,7 +316,7 @@ static void *acceptor_thread(void *data)
 
 	xio_ev_loop_run(inbound.loop);
 	xio_unbind(inbound.server);
-	xio_ctx_close(inbound.ctx);
+	xio_ctx_destroy(inbound.ctx);
 	xio_ev_loop_destroy(&inbound.loop);
 	return NULL;
 }
@@ -338,14 +338,14 @@ int main(int argc, char *argv[])
 
 #if UNBOUND_OUTBOUND_THREAD
 	/* start outbound thread */
-	outbound.loop = xio_ev_loop_init();
-	outbound.ctx = xio_ctx_open(NULL, outbound.loop, 0);
+	outbound.loop = xio_ev_loop_create();
+	outbound.ctx = xio_ctx_create(NULL, outbound.loop, 0);
 	pthread_create(&outbound.thread_id, NULL, outbound_thread, NULL);
 #endif
 
 	/* start acceptor thread */
-	inbound.loop = xio_ev_loop_init();
-	inbound.ctx = xio_ctx_open(NULL, inbound.loop, 0);
+	inbound.loop = xio_ev_loop_create();
+	inbound.ctx = xio_ctx_create(NULL, inbound.loop, 0);
 	pthread_create(&inbound.thread_id, NULL, acceptor_thread, NULL);
 
 	/* wait for default ctx init */
