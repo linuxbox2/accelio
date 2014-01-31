@@ -2,5 +2,4 @@
 add_subdirectory(hello_world)
 add_subdirectory(hello_world1)
 add_subdirectory(hello_world_mt)
-add_subdirectory(hello_world_mt1)
 add_subdirectory(raio)
