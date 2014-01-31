@@ -26,9 +26,9 @@ CHECK_INCLUDE_FILE("rdma/rdma_cma.h" HAVE_RDMA_CMA_H)
 find_library(IBVERBS, ibverbs, "${OFED_PREFIX}/lib")
 
 # require verbs headers
-if((NOT HAVE_VERBS_H) OR (NOT HAVE_RDMA_CMA_H))
-  message(FATAL_ERROR "Unable to find OFED header files")
-endif((NOT HAVE_VERBS_H) OR (NOT HAVE_RDMA_CMA_H))
+#if((NOT HAVE_VERBS_H) OR (NOT HAVE_RDMA_CMA_H))
+#  message(FATAL_ERROR "Unable to find OFED header files")
+#endif((NOT HAVE_VERBS_H) OR (NOT HAVE_RDMA_CMA_H))
 
 option(DEBUG "enable debug build" OFF)
 

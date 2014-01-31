@@ -48,12 +48,9 @@
 /*---------------------------------------------------------------------------*/
 void process_request(struct xio_msg *req)
 {
-	static int cnt = 0;
-
 	if (1 /* ++cnt == PRINT_COUNTER */) {
 		printf("message: [%"PRIu64"] - %s\n",
 				(req->sn + 1), (char *)req->in.header.iov_base);
-		cnt = 0;
 	}
 
 }
@@ -160,7 +157,6 @@ int main(int argc, char *argv[])
 	struct xio_server	*server;	/* server portal */
 	char			url[256];
 	struct xio_context	*ctx;
-	void			*loop;
 
 	if (argc < 2) {
 		printf("Usage: %s <host> <port>\n", argv[0]);
@@ -170,11 +166,8 @@ int main(int argc, char *argv[])
 	/* initialize library */
 	xio_init();
 
-	/* open default event loop */
-	loop	= xio_ev_loop_create();
-
 	/* create thread context for the client */
-	ctx	= xio_ctx_create(NULL, loop, 0);
+	ctx	= xio_context_create(NULL, 0);
 
 	/* create url to connect to */
 	sprintf(url, "rdma://%s:%s", argv[1], argv[2]);
@@ -182,7 +175,7 @@ int main(int argc, char *argv[])
 	server = xio_bind(ctx, &server_ops, url, NULL, 0, NULL);
 	if (server) {
 		printf("listen to %s\n", url);
-		xio_ev_loop_run(loop);
+		xio_context_run_loop(ctx, XIO_INFINITE);
 
 		/* normal exit phase */
 		fprintf(stdout, "exit signaled\n");
@@ -193,10 +186,7 @@ int main(int argc, char *argv[])
 
 
 	/* free the context */
-	xio_ctx_destroy(ctx);
-
-	/* destroy the default loop */
-	xio_ev_loop_destroy(&loop);
+	xio_context_destroy(ctx);
 
 	return 0;
 }
