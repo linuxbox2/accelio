@@ -6,6 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
   "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 include_directories(  
+  ${PROJECT_SOURCE_DIR}/src/usr/rdma
   ${PROJECT_BINARY_DIR}/include
   ${OFED_PREFIX}/include
 )
