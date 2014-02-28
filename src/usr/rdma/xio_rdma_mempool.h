@@ -55,7 +55,13 @@ struct xio_rdma_mp_mem {
 struct xio_rdma_mempool *xio_rdma_mempool_create(void);
 
 /* create mempool with NO (!) allocators */
-struct xio_rdma_mempool *xio_rdma_mempool_create_ex(void);
+
+#define XIO_RDMA_MEMPOOL_FLAG_NONE      0x0000
+#define XIO_RDMA_MEMPOOL_FLAG_REG       0x0001
+
+#define XIO_RDMA_MEMPOOL_DEFAULTS	(XIO_RDMA_MEMPOOL_FLAG_REG)
+
+struct xio_rdma_mempool *xio_rdma_mempool_create_ex(uint32_t flags);
 
 /* add an allocator to current set (setup only) */
 int xio_rdma_mempool_add_allocator(struct xio_rdma_mempool *mpool,
