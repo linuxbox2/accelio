@@ -44,13 +44,6 @@
 struct xio_mr;
 struct xio_rdma_mempool;
 
-struct xio_rdma_mp_mem {
-	void		*addr;
-	size_t		length;
-	struct xio_mr	*mr;
-	void		*cache;
-};
-
 /* create mempool with default allocators */
 struct xio_rdma_mempool *xio_rdma_mempool_create(void);
 
