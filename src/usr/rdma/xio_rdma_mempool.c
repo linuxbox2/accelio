@@ -395,19 +395,19 @@ struct xio_rdma_mempool *xio_rdma_mempool_create(void)
 	p->slot[0].max_mb_nr		= XIO_16K_MAX_NR;
 	p->slot[0].alloc_quantum_nr	= XIO_16K_ALLOC_NR;
 
-	p->slot[0].pool			= p;
+	p->slot[1].pool			= p;
 	p->slot[1].mb_size		= XIO_64K_BLOCK_SZ;
 	p->slot[1].init_mb_nr		= XIO_64K_MIN_NR;
 	p->slot[1].max_mb_nr		= XIO_64K_MAX_NR;
 	p->slot[1].alloc_quantum_nr		= XIO_64K_ALLOC_NR;
 
-	p->slot[0].pool			= p;
+	p->slot[2].pool			= p;
 	p->slot[2].mb_size		= XIO_256K_BLOCK_SZ;
 	p->slot[2].init_mb_nr		= XIO_256K_MIN_NR;
 	p->slot[2].max_mb_nr		= XIO_256K_MAX_NR;
 	p->slot[2].alloc_quantum_nr		= XIO_256K_ALLOC_NR;
 
-	p->slot[0].pool			= p;
+	p->slot[3].pool			= p;
 	p->slot[3].mb_size		= XIO_1M_BLOCK_SZ;
 	p->slot[3].init_mb_nr		= XIO_1M_MIN_NR;
 	p->slot[3].max_mb_nr		= XIO_1M_MAX_NR;
