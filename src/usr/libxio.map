@@ -37,7 +37,8 @@ XIO_1.0 {
 		xio_redirect;
 		xio_reject;
 		xio_get_connection;
-		xio_bind;		
+		xio_get_connection_context;
+		xio_bind;
 		xio_unbind;
 		xio_poll_completions;
 		xio_mempool_create;
