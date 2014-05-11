@@ -273,6 +273,17 @@ enum xio_context_attr_mask {
 	XIO_CONTEXT_ATTR_USER_CTX		= 1 << 0
 };
 
+/**
+ * @enum xio_session_attr_mask
+ * @brief supported session attributes to query/modify
+ */
+enum xio_session_attr_mask {
+	XIO_SESSION_ATTR_USER_CTX		= 1 << 0,
+	XIO_SESSION_ATTR_SES_OPS		= 1 << 1,
+	XIO_SESSION_ATTR_URI			= 1 << 2
+};
+
+
 /*---------------------------------------------------------------------------*/
 /* opaque data structures                                                    */
 /*---------------------------------------------------------------------------*/
@@ -327,7 +338,9 @@ struct xio_session_attr {
 	struct xio_session_ops	*ses_ops;	/**< session's ops callbacks  */
 	void			*user_context;  /**< private user data snt to */
 						/**< server upon new session  */
+	char			*uri;		  /**< the uri		      */
 	size_t			user_context_len; /**< private data length    */
+	uint16_t		uri_len;	  /**< uri length            */
 };
 
 /**
@@ -985,6 +998,19 @@ struct xio_session *xio_session_create(
  * @returns success (0), or a (negative) error value
  */
 int xio_session_destroy(struct xio_session *session);
+
+/**
+ * query session parameters
+ *
+ * @param[in] session	The xio session handle
+ * @param[in] attr	The session attributes structure
+ * @param[in] attr_mask attribute mask to query
+ *
+ * @returns success (0), or a (negative) error value
+ */
+int xio_query_session(struct xio_session *session,
+		      struct xio_session_attr *attr,
+		      int attr_mask);
 
 /**
  * creates connection handle
